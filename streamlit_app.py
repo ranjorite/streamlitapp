@@ -8,7 +8,14 @@ from langchain.chains import RetrievalQA
 def generate_response(uploaded_file, openai_api_key, query_text):
     # Load document if file is uploaded
     if uploaded_file is not None:
-        documents = [uploaded_file.read().decode()]
+        # Use PyPDF2 to read the PDF file and extract the text
+        pdf_reader = PyPDF2.PdfFileReader(BytesIO(uploaded_file.read()))
+        num_pages = pdf_reader.numPages
+        documents = []
+        for page in range(num_pages):
+            page_obj = pdf_reader.getPage(page)
+            page_text = page_obj.extractText()
+            documents.append(page_text)
         # Split documents into chunks
         text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
         texts = text_splitter.create_documents(documents)
